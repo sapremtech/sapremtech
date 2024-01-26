@@ -1,0 +1,6 @@
+- 👋 Hi, I’m @sapremtech
+- 👀 I’m interested in Windows!
+- 🌱 I’m currently learning HTML!
+- 📫 How to reach me: Friend request me on discord: cyanminemanner
+- 😄 Pronouns: he/him
+- ⚡ Fun fact: I made this account for a website by Tech Stuff
