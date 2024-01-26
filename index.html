@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<title>Page</title>
+
+<!-- CSS Libraries -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://rawcdn.githack.com/medialize/sass.js/71d9bed2cad10969efda9905aa1bddacc480f372/dist/sass.sync.js?min=1"></script>
+<script src="https://rawcdn.githack.com/LeaVerou/prefixfree/cf4c0051cf54f353c1473b6a7733e931e51f8176/prefixfree.min.js"></script>
+<script>window.addEventListener("load",(async()=>{const t=t=>new Promise(((e,n)=>Sass.compile(t,(t=>{0==t.status?e(t.text):n(t.formatted)})))),e=document.querySelectorAll('style[type="text/tailwindscss"]');for(var n=0;n<e.length;n++)e[n].innerHTML=await t(e[n].innerHTML),e[n].type="text/tailwindcss";const s=document.querySelectorAll('style[type="text/scss"]');for(n=0;n<s.length;n++)s[n].innerHTML=await t(s[n].innerHTML),s[n].type="text/css"}));</script>
+
+<!-- JS Libraries -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script async defer>
+addEventListener("DOMContentLoaded", ()=>{
+  document.querySelectorAll("template[id]").forEach(elem=>{
+    customElements.define(
+      elem.id,
+      class extends HTMLElement {
+        constructor() {
+          super();
+          //const shadowRoot = this.attachShadow({mode: "open"});
+          //Real Shadow DOM breaks Tailwind, so I use a fake "shadow-root" node, and manually implement slots.
+          const shadowRoot = document.createElement("shadow-root"); this.appendChild(shadowRoot);
+          shadowRoot.style.display = 'contents';
+          this.style.display = 'contents';
+          shadowRoot.appendChild(elem.content.cloneNode(true));
+          shadowRoot.querySelectorAll("slot[name]").forEach(slot=>{
+            slot.style.display = 'contents';
+            this.querySelectorAll(":scope > *[slot]:not(shadow-root)").forEach(elem=>{
+              if (elem.slot == slot.name) {
+                slot.appendChild(elem);
+              }
+            });
+          });
+          shadowRoot.querySelectorAll("slot:not([name])").forEach(slot=>{
+            slot.style.display = 'contents';
+            this.querySelectorAll(":scope > *:not([slot]):not(shadow-root)").forEach(elem=>slot.appendChild(elem));
+          });
+        }
+      }
+    );
+  });
+});
+</script>
+
+<!-- Custom Styles -->
+<style>
+:root {
+  background-image: url('https://i.imgur.com/VvNhMb0.jpg');
+  background-position: center center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+* {box-sizing: border-box;}
+body {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+}
+p {
+  white-space: pre-line;
+}
+</style>
+
+<!-- Custom Scripts -->
+<script>
+document.addEventListener('contextmenu', event => event.preventDefault());
+
+function dragElement(elmnt, useSnap) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  if (elmnt.querySelector('.dragHeader')) {
+    // if present, the header is where you move the DIV from:
+    elmnt.querySelector('.dragHeader').onmousedown = dragMouseDown;
+  } else {
+    // otherwise, move the DIV from anywhere inside the DIV:
+    elmnt.onmousedown = dragMouseDown;
+  }
+  let placeholderElem = document.createElement('div');
+  placeholderElem.style.width = elmnt.offsetWidth;
+  placeholderElem.style.height = elmnt.offsetHeight;
+  placeholderElem.style.display = 'none';
+  let elem_old_pos = {};
+  elem_old_pos.width = elmnt.offsetWidth;
+  elem_old_pos.height = elmnt.offsetHeight;
+  elem_old_pos.left = elmnt.getBoundingClientRect().left;
+  elem_old_pos.top = elmnt.getBoundingClientRect().top;
+  elmnt.style.left = elem_old_pos.left;
+  elmnt.style.top = elem_old_pos.top;
+  elmnt.style.position = 'static';
+  elmnt.insertAdjacentElement('beforebegin', placeholderElem)
+  let element_locked = true;
+
+  window.addEventListener('resize',()=>{
+    var old_elem_status = elmnt.style.position;
+    elmnt.style.position = 'static';
+    var old_placeholder_status = placeholderElem.style.display;
+    placeholderElem.style.display = 'none';
+    placeholderElem.style.width = elmnt.offsetWidth;
+    placeholderElem.style.height = elmnt.offsetHeight;
+    elem_old_pos.width = elmnt.offsetWidth;
+    elem_old_pos.height = elmnt.offsetHeight;
+    elem_old_pos.left = elmnt.getBoundingClientRect().left;
+    elem_old_pos.top = elmnt.getBoundingClientRect().top;
+    elmnt.style.position = old_elem_status;
+    placeholderElem.style.display = old_placeholder_status;
+    if (element_locked) {
+      elmnt.style.left = elem_old_pos.left;
+      elmnt.style.top = elem_old_pos.top;
+    }
+  })
+
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    elmnt.style.position = 'fixed';
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    // check position
+    if (useSnap) {
+      if (
+          ((elem_old_pos.left + elem_old_pos.width) > elmnt.getBoundingClientRect().left) &&
+          ((elmnt.getBoundingClientRect().left + elmnt.offsetWidth) > elem_old_pos.left) &&
+          ((elem_old_pos.top + elem_old_pos.height) > elmnt.getBoundingClientRect().top) &&
+          ((elmnt.getBoundingClientRect().top + elmnt.offsetHeight) > elem_old_pos.top)
+        ) {
+        placeholderElem.style.display = 'block';
+      } else {
+        placeholderElem.style.display = 'none';
+      }
+    }
+  }
+
+  function closeDragElement() {
+    // stop moving when mouse button is released:
+    document.onmouseup = null;
+    document.onmousemove = null;
+    if (useSnap &&
+        ((elem_old_pos.left + elem_old_pos.width) > elmnt.getBoundingClientRect().left) &&
+        ((elmnt.getBoundingClientRect().left + elmnt.offsetWidth) > elem_old_pos.left) &&
+        ((elem_old_pos.top + elem_old_pos.height) > elmnt.getBoundingClientRect().top) &&
+        ((elmnt.getBoundingClientRect().top + elmnt.offsetHeight) > elem_old_pos.top)
+      ) {
+      element_locked = true;
+      elmnt.style.position = 'static';
+      elmnt.style.left = elem_old_pos.left;
+      elmnt.style.top = elem_old_pos.top;
+      placeholderElem.style.display = 'none';
+    } else {
+      element_locked = false;
+      elmnt.style.position = 'fixed';
+      placeholderElem.style.display = 'none';
+    }
+  }
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.draggable-snap').forEach(elem=>dragElement(elem,true));
+  document.querySelectorAll('.draggable-nosnap').forEach(elem=>dragElement(elem,false));
+  document.querySelectorAll('p').forEach(elem=>elem.innerText = elem.innerText.trim());
+});
+</script>
+
+<!-- Templates -->
+<template id="aero-window">
+  <script>
+    document.querySelectorAll('.draggable-snap').forEach(elem=>dragElement(elem,true));
+    document.querySelectorAll('.draggable-nosnap').forEach(elem=>dragElement(elem,false));
+  </script>
+  <div class="backdrop-blur inline-flex flex-none flex-col justify-start items-center content-center flex-col hover:z-50 bg-[url('https://i.imgur.com/hHs8bQP.png')] rounded" style="filter: drop-shadow(0 0 0.75rem rgba(0,0,0,0.5));">
+    <div class="w-full bg-white/50 border-b-1 dragHeader w-full rounded-t backdrop-blur">
+      <span class="float-left px-2 cursor-default">
+        <slot name="icon"/>
+        <slot name="title"/>
+      </span>
+      <span class="w-8 inline-block"></span>
+    </div>
+    <div class="p-2 flex flex-none content-center justify-center items-center flex-col overflow-auto rounded-b">
+      <slot/>
+    </div>
+  </div>
+</template>
+
+<!-- Main Content -->
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window>
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window>
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window>
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window> 
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window>
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window>
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+    Long text Long text
+    Long text Long text
+  </p>
+</aero-window>
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window>
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window> 
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window>
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window>
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window>
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window>
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window> 
+<aero-window>
+  <span slot="title">Hello</span>
+  <p>
+    Test
+    Long text Long text
+  </p>
+</aero-window>
